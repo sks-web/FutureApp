@@ -29,3 +29,21 @@ exports.insertData = function insertData(UserDB, AddressDB, fullData, res){
     }
   });
 }
+
+exports.checkUser = function checkUser(UserDB, fullData, res){
+  UserDB.findOne({mail:fullData.email},function(err, body){
+    if(err){
+      console.log(err);
+    } else {
+      if(body!=null){
+        if(fullData.password===body.password){
+          res.render("home");
+        } else {
+          res.render("login", {msg:"Wrong Password!Please enter the password correctly"});
+        }
+      } else {
+        res.render("login", {msg:"Wrong mail ID"});
+      }
+    }
+  });
+}

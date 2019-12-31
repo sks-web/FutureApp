@@ -1,4 +1,5 @@
 // jshint esversion:6
+require('dotenv').config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
@@ -7,6 +8,7 @@ const services = require(__dirname+"/services/controller.js");
 const dbconnect = require(__dirname+"/Dbconnect/dbconnect.js");
 const userdata = require(__dirname+"/Schema/userdata.js");
 const useraddress = require(__dirname+"/Schema/useraddress.js");
+const encrypt = require("mongoose-encryption");
 
 const app = express();
 app.use(bodyParser.urlencoded({extended:false}));
@@ -17,6 +19,7 @@ app.use(express.static(__dirname+"/public"));
 dbconnect.dbConnect(mongoose);
 const Schema = mongoose.Schema;
   // Schema Part
+
 let addressSchema;
 useraddress.addressSchema(mongoose, Schema, function(data){
   addressSchema = data;
@@ -26,6 +29,7 @@ let userSchema;
 userdata.userSchema(mongoose, Schema, AddressDB, function(data){
   userSchema = data;
 });
+userSchema.plugin(encrypt, { secret: process.env.SECRET, encryptedFields: ["password"] });
 const UserDB = mongoose.model("UserDB", userSchema);
 
 app.get("/", function(req, res){
@@ -33,7 +37,7 @@ app.get("/", function(req, res){
 });
 
 app.get("/login", function(req, res){
-  res.render("login");
+  res.render("login",{msg:""});
 });
 
 app.get("/registration", function(req, res){
@@ -41,11 +45,13 @@ app.get("/registration", function(req, res){
 });
 
 app.post("/login", function(req, res){
-
+  var fullData = req.body;
+  services.checkUser(UserDB, fullData, res);
 });
 
 app.post("/registration", function(req, res){
   var fullData = req.body;
+  console.log(fullData);
   if(fullData.password==fullData.cpassword){
     services.insertData(UserDB, AddressDB, fullData, res);
   } else {
