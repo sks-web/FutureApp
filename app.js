@@ -9,7 +9,9 @@ const dbconnect = require(__dirname+"/Dbconnect/dbconnect.js");
 const userdata = require(__dirname+"/Schema/userdata.js");
 const useraddress = require(__dirname+"/Schema/useraddress.js");
 // const encrypt = require("mongoose-encryption");
-const md5 = require("md5");
+// const md5 = require("md5");
+const bcrypt = require("bcrypt");
+const saltRound = 5;
 
 
 const app = express();
@@ -48,14 +50,14 @@ app.get("/registration", function(req, res){
 
 app.post("/login", function(req, res){
   var fullData = req.body;
-  services.checkUser(UserDB, fullData, res, md5);
+  services.checkUser(UserDB, fullData, res, bcrypt);
 });
 
 app.post("/registration", function(req, res){
   var fullData = req.body;
   console.log(fullData);
   if(fullData.password==fullData.cpassword){
-    services.insertData(UserDB, AddressDB, fullData, res, md5);
+    services.insertData(UserDB, AddressDB, fullData, res, bcrypt);
   } else {
     res.render("registration",{msg:"password and confirm password does not matched"});
   }
