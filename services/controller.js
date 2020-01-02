@@ -1,11 +1,11 @@
 // jshint esversion:6
-exports.insertData = function insertData(UserDB, AddressDB, fullData, res){
+exports.insertData = function insertData(UserDB, AddressDB, fullData, res, md5){
   var userData = new UserDB({
     firstname: fullData.firstName,
     lastname: fullData.lastName,
     mobile: fullData.Mobile,
     mail: fullData.email,
-    password: fullData.password
+    password: md5(fullData.password)
   });
   var addressData = new AddressDB({
     city: fullData.city,
@@ -30,13 +30,13 @@ exports.insertData = function insertData(UserDB, AddressDB, fullData, res){
   });
 }
 
-exports.checkUser = function checkUser(UserDB, fullData, res){
+exports.checkUser = function checkUser(UserDB, fullData, res, md5){
   UserDB.findOne({mail:fullData.email},function(err, body){
     if(err){
       console.log(err);
     } else {
       if(body!=null){
-        if(fullData.password===body.password){
+        if(md5(fullData.password)===body.password){
           res.render("home");
         } else {
           res.render("login", {msg:"Wrong Password!Please enter the password correctly"});

@@ -8,7 +8,9 @@ const services = require(__dirname+"/services/controller.js");
 const dbconnect = require(__dirname+"/Dbconnect/dbconnect.js");
 const userdata = require(__dirname+"/Schema/userdata.js");
 const useraddress = require(__dirname+"/Schema/useraddress.js");
-const encrypt = require("mongoose-encryption");
+// const encrypt = require("mongoose-encryption");
+const md5 = require("md5");
+
 
 const app = express();
 app.use(bodyParser.urlencoded({extended:false}));
@@ -29,7 +31,7 @@ let userSchema;
 userdata.userSchema(mongoose, Schema, AddressDB, function(data){
   userSchema = data;
 });
-userSchema.plugin(encrypt, { secret: process.env.SECRET, encryptedFields: ["password"] });
+// userSchema.plugin(encrypt, { secret: process.env.SECRET, encryptedFields: ["password"] });
 const UserDB = mongoose.model("UserDB", userSchema);
 
 app.get("/", function(req, res){
@@ -46,14 +48,14 @@ app.get("/registration", function(req, res){
 
 app.post("/login", function(req, res){
   var fullData = req.body;
-  services.checkUser(UserDB, fullData, res);
+  services.checkUser(UserDB, fullData, res, md5);
 });
 
 app.post("/registration", function(req, res){
   var fullData = req.body;
   console.log(fullData);
   if(fullData.password==fullData.cpassword){
-    services.insertData(UserDB, AddressDB, fullData, res);
+    services.insertData(UserDB, AddressDB, fullData, res, md5);
   } else {
     res.render("registration",{msg:"password and confirm password does not matched"});
   }
